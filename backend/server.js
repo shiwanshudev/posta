@@ -4,6 +4,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 import { sql } from "./config/db.js";
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(morgan("dev"));
 app.use(helmet());
 
 app.use("/api/users", authRoutes);
+app.use("/api/posts", postRoutes);
 
 async function initDB() {
   try {
@@ -27,6 +29,17 @@ async function initDB() {
         email VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS posts(
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        user_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `;
     console.log("Database initialized successfully!");
