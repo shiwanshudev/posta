@@ -3,7 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import dotenv from "dotenv";
-import productRoutes from "./routes/productRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { sql } from "./config/db.js";
 
 dotenv.config();
@@ -16,19 +16,19 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(helmet());
 
-app.use("/api/products", productRoutes);
+app.use("/api/users", authRoutes);
 
 async function initDB() {
   try {
     await sql`
-    CREATE TABLE IF NOT EXISTS products(
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      image VARCHAR(255) NOT NULL,
-      price DECIMAL(10,2) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-`;
+      CREATE TABLE IF NOT EXISTS users(
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `;
     console.log("Database initialized successfully!");
   } catch (error) {
     console.log("Error initializing database!");
