@@ -9,6 +9,17 @@ export const getPostsController = async (req, res) => {
   }
 };
 
+export const getUserPostsController = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const posts =
+      await sql`SELECT * FROM posts WHERE user_id=${userId} ORDER BY created_at DESC`;
+    return res.status(200).json({ posts });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
 export const createPostController = async (req, res) => {
   // Middleware does the decoding part from token to user id and stores it in req
   try {

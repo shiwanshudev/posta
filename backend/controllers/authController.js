@@ -60,7 +60,7 @@ export const loginController = async (req, res) => {
       });
     }
 
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials!" });
@@ -74,8 +74,32 @@ export const loginController = async (req, res) => {
     return res.status(200).json({
       token,
       user: userWithoutPassword,
-      message: "Succssfully logged in!",
+      message: "Successfully logged in!",
     });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// Verify token
+export const verifyTokenController = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided!" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [user] =
+      await sql`SELECT id, name, email, created_at FROM users WHERE id=${decoded.id}`;
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid token!" });
+    }
+
+    return res.status(200).json({ user });
   } catch (error) {
     return res.status(500).json({
       message: error.message,

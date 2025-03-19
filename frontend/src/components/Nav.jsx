@@ -1,6 +1,9 @@
 import { NavLink, Link } from "react-router";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Nav() {
+  const { user, logout } = useAuth();
+
   return (
     <nav className="py-4 bg-gradient-to-r from-zinc-800 to-zinc-900 shadow-md font-poppins">
       <div className="container mx-auto flex items-center justify-between">
@@ -14,26 +17,37 @@ export default function Nav() {
 
         {/* Navigation Links */}
         <div className="flex space-x-6">
-          <NavLink
-            to="/register"
-            className={({ isActive }) =>
-              `text-white hover:text-zinc-300 transition duration-300 ${
-                isActive ? "font-semibold border-b-2 border-white" : ""
-              }`
-            }
-          >
-            Register
-          </NavLink>
-          <NavLink
-            to="/login"
-            className={({ isActive }) =>
-              `text-white hover:text-zinc-300 transition duration-300 ${
-                isActive ? "font-semibold border-b-2 border-white" : ""
-              }`
-            }
-          >
-            Login
-          </NavLink>
+          {user ? (
+            <button
+              className="text-white hover:text-zinc-300 transition duration-300"
+              onClick={() => logout()}
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <NavLink
+                to="/register"
+                className={({ isActive }) =>
+                  `text-white hover:text-zinc-300 transition duration-300 ${
+                    isActive ? "font-semibold border-b-2 border-white" : ""
+                  }`
+                }
+              >
+                Register
+              </NavLink>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  `text-white hover:text-zinc-300 transition duration-300 ${
+                    isActive ? "font-semibold border-b-2 border-white" : ""
+                  }`
+                }
+              >
+                Login
+              </NavLink>
+            </>
+          )}
         </div>
       </div>
     </nav>
