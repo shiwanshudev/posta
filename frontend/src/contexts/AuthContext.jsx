@@ -15,11 +15,14 @@ const AuthProvider = ({ children }) => {
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
         try {
-          const res = await fetch("http://localhost:3000/api/users/verify", {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URI}/api/users/verify`,
+            {
+              headers: {
+                Authorization: `Bearer ${storedToken}`,
+              },
+            }
+          );
           if (!res.ok) {
             throw new Error("Token verification failed");
           }
@@ -42,13 +45,16 @@ const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:3000/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URI}/api/users/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (!res.ok) {
         throw new Error("Login failed. Please check your credentials.");
@@ -67,6 +73,39 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (userData) => {
+    const { name, email, password } = userData;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URI}/api/users/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, email, password }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Registration failed. Please check your details.");
+      }
+
+      const data = await res.json();
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
+      navigate("/posts");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -76,7 +115,16 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, loading, error, setUser }}
+      value={{
+        user,
+        token,
+        loading,
+        error,
+        login,
+        register,
+        logout,
+        setUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

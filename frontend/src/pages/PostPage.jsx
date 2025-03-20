@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 
 export default function PostPage() {
   const { user, token, loading: authLoading, setUser } = useAuth();
@@ -8,13 +9,14 @@ export default function PostPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newPost, setNewPost] = useState({ title: "", content: "" });
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const getPosts = async () => {
     try {
       if (!token) {
         throw new Error("No authorization token found");
       }
-      const res = await fetch("http://localhost:3000/api/posts", {
+      const res = await fetch(`${import.meta.env.VITE_API_URI}/api/posts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -38,14 +40,17 @@ export default function PostPage() {
         throw new Error("No authorization token found");
       }
 
-      const response = await fetch("http://localhost:3000/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newPost),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URI}/api/posts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newPost),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -65,11 +70,14 @@ export default function PostPage() {
     const verifyToken = async () => {
       if (token) {
         try {
-          const res = await fetch("http://localhost:3000/api/users/verify", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const res = await fetch(
+            `${import.meta.env.VITE_API_URI}/api/users/verify`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
           if (!res.ok) {
             throw new Error("Token verification failed");
           }
@@ -88,13 +96,27 @@ export default function PostPage() {
     verifyToken();
   }, [token, setUser]);
 
-  if (authLoading) {
-    return <p>Loading authentication...</p>;
+  if (authLoading || loading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <FaSpinner className="animate-spin text-4xl text-blue-500" />
+      </div>
+    );
   }
+
+  const openModal = (post) => {
+    setSelectedPost(post);
+  };
+
+  const closeModal = () => {
+    setSelectedPost(null);
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">My Posts</h1>
+      <h1 className="text-3xl font-bold mb-4">
+        {user.name.split(" ")[0]}'s Notes
+      </h1>
 
       {!user && (
         <h2 className="text-xl">
@@ -106,10 +128,9 @@ export default function PostPage() {
         </h2>
       )}
 
-      {loading && <p>Loading posts...</p>}
       {error && <p className="text-red-500">Error: {error}</p>}
 
-      {user && !loading && !error && (
+      {user && !error && (
         <>
           <form
             onSubmit={createPost}
@@ -157,7 +178,7 @@ export default function PostPage() {
                 type="submit"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Create Post
+                Create Note
               </button>
             </div>
           </form>
@@ -167,20 +188,16 @@ export default function PostPage() {
               {posts.map((post, index) => (
                 <div
                   key={post.id}
-                  className={`p-4 rounded shadow-md overflow-hidden ${
-                    index % 2 === 0 ? "bg-blue-100" : "bg-green-100"
+                  className={`p-4 rounded shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
+                    index % 2 === 0 ? "bg-blue-100" : "bg-indigo-100"
                   }`}
+                  onClick={() => openModal(post)}
                 >
                   <h3 className="text-xl font-bold mb-2">{post.title}</h3>
-                  <p
-                    className="text-gray-700 mb-4 overflow-hidden overflow-ellipsis"
-                    style={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                    }}
-                  >
-                    {post.content}
+                  <p className="text-gray-700 mb-4 overflow-hidden">
+                    {post.content.length > 27
+                      ? post.content.slice(0, 27) + "..."
+                      : post.content}
                   </p>
                   <small className="text-gray-500">
                     Created at: {new Date(post.created_at).toLocaleString()}
@@ -189,9 +206,31 @@ export default function PostPage() {
               ))}
             </div>
           ) : (
-            <p>No posts available.</p>
+            <p>No notes available.</p>
           )}
         </>
+      )}
+
+      {selectedPost && (
+        <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">{selectedPost.title}</h2>
+              <button
+                className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
+                onClick={closeModal}
+              >
+                <FaTimes size={24} />
+              </button>
+            </div>
+            <div className="overflow-y-auto max-h-[70vh] break-all">
+              <p className="text-gray-700">{selectedPost.content}</p>
+              <small className="text-gray-500">
+                Created at: {new Date(selectedPost.created_at).toLocaleString()}
+              </small>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

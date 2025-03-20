@@ -1,9 +1,33 @@
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "../contexts/AuthContext";
+
 export default function Register() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      await register({ name, email, password });
+      navigate("/posts");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="container mx-auto font-poppins">
       <div className="flex flex-col justify-center items-center max-w-md mx-auto py-8 px-10 lg:px-0">
         <h3 className="text-3xl font-semibold mb-6 text-zinc-800">Register</h3>
-        <form action="" className="flex flex-col w-full">
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="flex flex-col w-full">
           <div className="my-4 flex flex-col">
             <label className="text-sm text-zinc-600 mb-1" htmlFor="name">
               Name
@@ -13,6 +37,8 @@ export default function Register() {
               placeholder="Enter your name"
               className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300"
               id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
@@ -25,6 +51,8 @@ export default function Register() {
               placeholder="Enter your email"
               className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300"
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -37,6 +65,8 @@ export default function Register() {
               placeholder="Enter your password"
               id="password"
               className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>

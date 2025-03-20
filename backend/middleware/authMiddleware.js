@@ -13,10 +13,10 @@ const authMiddleware = (req, res, next) => {
         return res.status(401).json({ message: "Unauthorized" });
       } else {
         req.user = decoded;
+        next();
       }
     });
   }
-  next();
 };
 
 export default authMiddleware;

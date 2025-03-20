@@ -27,7 +27,7 @@ export default function Home() {
       <div className="hidden lg:w-1/2 bg-gradient-to-br from-blue-700 to-blue-900 lg:flex lg:flex-col justify-center items-center relative">
         <img src="/doggo.svg" alt="doggo" className="h-96 z-0" />
         <p className="font-semibold text-white text-center max-w-xs z-10 mt-4 p-4 shadow-lg rounded-md bg-blue-700 bg-opacity-50">
-          Secure, no-nonsense, and simple posts for your daily use.
+          Secure, no-nonsense, and simple notes app for your daily use.
         </p>
       </div>
 
