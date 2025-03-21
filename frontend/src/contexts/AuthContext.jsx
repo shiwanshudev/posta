@@ -31,7 +31,7 @@ const AuthProvider = ({ children }) => {
           setToken(storedToken);
         } catch (error) {
           console.error("Token verification error:", error);
-          setError(error.message);
+          setError(error);
         }
       }
       setLoading(false);
@@ -66,8 +66,7 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       navigate("/posts");
     } catch (error) {
-      console.error("Login error:", error);
-      setError(error.message);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -100,7 +99,7 @@ const AuthProvider = ({ children }) => {
       navigate("/posts");
     } catch (error) {
       console.error("Registration error:", error);
-      setError(error.message);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -124,6 +123,7 @@ const AuthProvider = ({ children }) => {
         register,
         logout,
         setUser,
+        setError,
       }}
     >
       {children}

@@ -6,19 +6,17 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const { register } = useAuth();
+  const { register, loading, error, setError } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-
     try {
       await register({ name, email, password });
       navigate("/posts");
     } catch (err) {
-      setError(err.message);
+      console.log(err);
     }
   };
 
@@ -26,7 +24,7 @@ export default function Register() {
     <div className="container mx-auto font-poppins">
       <div className="flex flex-col justify-center items-center max-w-md mx-auto py-8 px-10 lg:px-0">
         <h3 className="text-3xl font-semibold mb-6 text-zinc-800">Register</h3>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <p className="text-red-500 mb-4">{error.toString()}</p>}
         <form onSubmit={handleSubmit} className="flex flex-col w-full">
           <div className="my-4 flex flex-col">
             <label className="text-sm text-zinc-600 mb-1" htmlFor="name">
@@ -71,8 +69,14 @@ export default function Register() {
             />
           </div>
 
-          <button className="bg-blue-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-blue-700 transition duration-200">
-            Register
+          <button
+            type="submit"
+            disabled={loading}
+            className={`bg-blue-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-blue-700 transition duration-200 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
       </div>

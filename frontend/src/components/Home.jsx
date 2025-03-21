@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import Login from "./Login";
+import { FaSpinner } from "react-icons/fa";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -16,7 +17,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex min-h-screen justify-center items-center">
-        <p>Loading...</p>
+        <FaSpinner className="animate-spin text-4xl text-blue-500" />
       </div>
     );
   }
