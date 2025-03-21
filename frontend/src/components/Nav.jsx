@@ -5,7 +5,7 @@ export default function Nav() {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="py-4 bg-gradient-to-r from-zinc-800 to-zinc-900 shadow-md font-poppins">
+    <nav className="py-4 bg-gradient-to-r from-zinc-800 to-zinc-900 shadow-md font-poppins px-5 lg:px-0">
       <div className="container mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link
