@@ -17,7 +17,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex min-h-screen justify-center items-center">
-        <FaSpinner className="animate-spin text-4xl text-blue-500" />
+        <FaSpinner className="animate-spin text-4xl text-indigo-500" />
       </div>
     );
   }
@@ -25,9 +25,9 @@ export default function Home() {
   return (
     <div className="flex min-h-screen justify-center font-poppins">
       {/* Left Column with Image and Tagline */}
-      <div className="hidden lg:w-1/2 bg-gradient-to-br from-blue-700 to-blue-900 lg:flex lg:flex-col justify-center items-center relative">
+      <div className="hidden lg:w-1/2 bg-gradient-to-br from-indigo-700 to-indigo-900 lg:flex lg:flex-col justify-center items-center relative">
         <img src="/doggo.svg" alt="doggo" className="h-96 z-0" />
-        <p className="font-semibold text-white text-center max-w-xs z-10 mt-4 p-4 shadow-lg rounded-md bg-blue-700 bg-opacity-50">
+        <p className="font-semibold text-white text-center max-w-xs z-10 mt-4 p-4 shadow-lg rounded-md bg-indigo-700 bg-opacity-50">
           Secure, no-nonsense, and simple notes app for your daily use.
         </p>
       </div>

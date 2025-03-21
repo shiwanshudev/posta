@@ -72,7 +72,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className={`bg-blue-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-blue-700 transition duration-200 ${
+            className={`bg-indigo-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-indigo-700 transition duration-200 ${
               loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >

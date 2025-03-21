@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { FaTimes, FaSpinner } from "react-icons/fa";
+import { FaTimes, FaSpinner, FaTrash } from "react-icons/fa";
 
 export default function PostPage() {
   const { user, token, loading: authLoading, setUser } = useAuth();
@@ -66,6 +66,27 @@ export default function PostPage() {
     }
   };
 
+  const deletePost = async (postId) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URI}/api/posts/${postId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Error: ${res.status} ${res.statusText}`);
+      }
+      getPosts();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   useEffect(() => {
     const verifyToken = async () => {
       if (token) {
@@ -99,7 +120,7 @@ export default function PostPage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen justify-center items-center">
-        <FaSpinner className="animate-spin text-4xl text-blue-500" />
+        <FaSpinner className="animate-spin text-4xl text-indigo-500" />
       </div>
     );
   }
@@ -121,7 +142,7 @@ export default function PostPage() {
       {!user && (
         <h2 className="text-xl">
           Please{" "}
-          <Link to="/login" className="text-blue-500">
+          <Link to="/login" className="text-indigo-500">
             Login
           </Link>{" "}
           to view this page
@@ -176,7 +197,7 @@ export default function PostPage() {
             <div className="flex items-center justify-between">
               <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Create Note
               </button>
@@ -189,11 +210,21 @@ export default function PostPage() {
                 <div
                   key={post.id}
                   className={`p-4 rounded shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
-                    index % 2 === 0 ? "bg-blue-100" : "bg-indigo-100"
+                    index % 2 === 0 ? "bg-indigo-100" : "bg-indigo-100"
                   }`}
                   onClick={() => openModal(post)}
                 >
-                  <h3 className="text-xl font-bold mb-2">{post.title}</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold mb-2">{post.title}</h3>
+                    <FaTrash
+                      className="text-zinc-500 hover:text-red-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deletePost(post.id);
+                      }}
+                    />
+                  </div>
+
                   <p className="text-gray-700 mb-4 overflow-hidden">
                     {post.content.length > 27
                       ? post.content.slice(0, 27) + "..."

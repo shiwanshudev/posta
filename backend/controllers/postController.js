@@ -38,3 +38,25 @@ export const createPostController = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
+
+export const deletePostController = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.user?.id;
+    if (!postId || !userId) {
+      return res
+        .status(400)
+        .json({ message: "Post id and user id are required!" });
+    }
+
+    const [post] =
+      await sql`DELETE FROM posts WHERE id=${postId} AND user_id=${userId} RETURNING *`;
+    if (!post) {
+      return res.status(400).json({ message: "Post not found!" });
+    }
+
+    return res.status(200).json({ post });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
