@@ -1,5 +1,6 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
+import { Link } from "react-router";
 
 export default function Login() {
   const { login, error, setError } = useAuth();
@@ -68,6 +69,12 @@ export default function Login() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+        <p className="mt-4">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-indigo-500 hover:underline">
+            Register here
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ export default function Home() {
       </div>
 
       {/* Right Column with Login Form */}
-      <div className="lg:w-1/2 lg:flex items-center justify-center">
+      <div className="lg:w-1/2 lg:flex items-center justify-center flex-col">
         <Login />
       </div>
     </div>

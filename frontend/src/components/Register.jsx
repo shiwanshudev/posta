@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
+import { Link } from "react-router";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -79,6 +80,12 @@ export default function Register() {
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
+        <p className="mt-4">
+          Already have an account?{" "}
+          <Link to="/login" className="text-indigo-500 hover:underline">
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );
