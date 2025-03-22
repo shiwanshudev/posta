@@ -3,7 +3,7 @@ import Nav from "./components/Nav";
 
 function App() {
   return (
-    <main>
+    <main className="font-poppins">
       <Nav />
       <Outlet />
     </main>

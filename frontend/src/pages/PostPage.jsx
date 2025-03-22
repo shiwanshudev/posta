@@ -1,15 +1,18 @@
 import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
-import { FaTimes, FaSpinner, FaTrash } from "react-icons/fa";
+import { FaTimes, FaSpinner, FaTrash, FaPlus } from "react-icons/fa";
 
 export default function PostPage() {
   const { user, token, loading: authLoading, setUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [createLoading, setCreateLoading] = useState(false);
   const [error, setError] = useState(null);
   const [newPost, setNewPost] = useState({ title: "", content: "" });
   const [selectedPost, setSelectedPost] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState(null);
 
   const getPosts = async () => {
     try {
@@ -36,7 +39,9 @@ export default function PostPage() {
   const createPost = async (e) => {
     e.preventDefault();
     try {
+      setCreateLoading(true);
       if (!token) {
+        setCreateLoading(false);
         throw new Error("No authorization token found");
       }
 
@@ -53,14 +58,18 @@ export default function PostPage() {
       );
 
       if (!response.ok) {
+        setCreateLoading(false);
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
-
+      setCreateLoading(false);
       // Reset the form
       setNewPost({ title: "", content: "" });
 
       // Refresh the posts
       getPosts();
+
+      // Close the create note modal
+      setIsCreateModalOpen(false);
     } catch (err) {
       setError(err.message);
     }
@@ -68,6 +77,8 @@ export default function PostPage() {
 
   const deletePost = async (postId) => {
     try {
+      setDeletingPostId(postId);
+
       const res = await fetch(
         `${import.meta.env.VITE_API_URI}/api/posts/${postId}`,
         {
@@ -81,9 +92,13 @@ export default function PostPage() {
       if (!res.ok) {
         throw new Error(`Error: ${res.status} ${res.statusText}`);
       }
-      getPosts();
+
+      // Update the state to remove the deleted post
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+      setDeletingPostId(null);
     } catch (err) {
       setError(err.message);
+      setDeletingPostId(null);
     }
   };
 
@@ -133,11 +148,27 @@ export default function PostPage() {
     setSelectedPost(null);
   };
 
+  const openCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">
-        {user.name.split(" ")[0]}'s Notes
-      </h1>
+      <div className="flex justify-between items-center mb-8 flex-wrap">
+        <h1 className="text-3xl font-bold">
+          {user.name.split(" ")[0]}'s Notes
+        </h1>
+        <button
+          onClick={openCreateModal}
+          className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        >
+          <FaPlus className="inline mr-2" /> Create Note
+        </button>
+      </div>
 
       {!user && (
         <h2 className="text-xl">
@@ -153,69 +184,22 @@ export default function PostPage() {
 
       {user && !error && (
         <>
-          <form
-            onSubmit={createPost}
-            className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-          >
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="title"
-              >
-                Title
-              </label>
-              <input
-                id="title"
-                type="text"
-                placeholder="Title"
-                value={newPost.title}
-                onChange={(e) =>
-                  setNewPost({ ...newPost, title: e.target.value })
-                }
-                required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-            <div className="mb-6">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="content"
-              >
-                Content
-              </label>
-              <textarea
-                id="content"
-                placeholder="Content"
-                value={newPost.content}
-                onChange={(e) =>
-                  setNewPost({ ...newPost, content: e.target.value })
-                }
-                required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32"
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <button
-                type="submit"
-                className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Create Note
-              </button>
-            </div>
-          </form>
-
           {posts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {posts.map((post, index) => (
                 <div
                   key={post.id}
-                  className={`p-4 rounded shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
+                  className={`p-6 rounded-lg shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
                     index % 2 === 0 ? "bg-indigo-100" : "bg-indigo-100"
-                  }`}
+                  } ${deletingPostId === post.id ? "fade-out" : ""}`}
                   onClick={() => openModal(post)}
                 >
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold mb-2">{post.title}</h3>
+                  <div className="flex justify-between items-center flex-wrap">
+                    <h3 className="text-xl font-bold mb-2">
+                      {post.title.length > 12
+                        ? post.title.slice(0, 12) + "..."
+                        : post.title}
+                    </h3>
                     <FaTrash
                       className="text-zinc-500 hover:text-red-700"
                       onClick={(e) => {
@@ -246,7 +230,11 @@ export default function PostPage() {
         <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">{selectedPost.title}</h2>
+              <h2 className="text-2xl font-bold">
+                {selectedPost.title.length > 32
+                  ? selectedPost.title.slice(0, 32) + "..."
+                  : selectedPost.title}
+              </h2>
               <button
                 className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
                 onClick={closeModal}
@@ -260,6 +248,64 @@ export default function PostPage() {
                 Created at: {new Date(selectedPost.created_at).toLocaleString()}
               </small>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Create Note</h2>
+              <button
+                className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
+                onClick={closeCreateModal}
+              >
+                <FaTimes size={24} />
+              </button>
+            </div>
+            <form onSubmit={createPost} className="flex flex-col w-full">
+              <div className="my-4 flex flex-col">
+                <label className="text-sm text-zinc-600 mb-1" htmlFor="title">
+                  Title
+                </label>
+                <input
+                  id="title"
+                  type="text"
+                  placeholder="Title"
+                  value={newPost.title}
+                  onChange={(e) =>
+                    setNewPost({ ...newPost, title: e.target.value })
+                  }
+                  required
+                  className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300"
+                />
+              </div>
+              <div className="my-4 flex flex-col">
+                <label className="text-sm text-zinc-600 mb-1" htmlFor="content">
+                  Content
+                </label>
+                <textarea
+                  id="content"
+                  placeholder="Content"
+                  value={newPost.content}
+                  onChange={(e) =>
+                    setNewPost({ ...newPost, content: e.target.value })
+                  }
+                  required
+                  className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300 h-32"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={createLoading}
+                className={`bg-indigo-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-indigo-700 transition duration-200 ${
+                  createLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {createLoading ? "Creating..." : "Create Note"}
+              </button>
+            </form>
           </div>
         </div>
       )}
