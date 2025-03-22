@@ -3,6 +3,90 @@ import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { FaTimes, FaSpinner, FaTrash, FaPlus } from "react-icons/fa";
 
+const PostModal = ({ post, onClose }) => (
+  <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold break-all">{post.title}</h2>
+        <button
+          className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
+          onClick={onClose}
+        >
+          <FaTimes size={24} />
+        </button>
+      </div>
+      <div className="overflow-y-auto max-h-[70vh] break-all">
+        <p className="text-gray-700">{post.content}</p>
+        <small className="text-gray-500">
+          Created at: {new Date(post.created_at).toLocaleString()}
+        </small>
+      </div>
+    </div>
+  </div>
+);
+
+const CreatePostModal = ({
+  newPost,
+  setNewPost,
+  onSubmit,
+  onClose,
+  loading,
+}) => (
+  <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
+    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Create Note</h2>
+        <button
+          className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
+          onClick={onClose}
+        >
+          <FaTimes size={24} />
+        </button>
+      </div>
+      <form onSubmit={onSubmit} className="flex flex-col w-full">
+        <div className="my-4 flex flex-col">
+          <label className="text-sm text-zinc-600 mb-1" htmlFor="title">
+            Title
+          </label>
+          <input
+            id="title"
+            type="text"
+            placeholder="Title"
+            value={newPost.title}
+            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+            required
+            className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300"
+          />
+        </div>
+        <div className="my-4 flex flex-col">
+          <label className="text-sm text-zinc-600 mb-1" htmlFor="content">
+            Content
+          </label>
+          <textarea
+            id="content"
+            placeholder="Content"
+            value={newPost.content}
+            onChange={(e) =>
+              setNewPost({ ...newPost, content: e.target.value })
+            }
+            required
+            className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300 h-32"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`bg-indigo-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-indigo-700 transition duration-200 ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          {loading ? "Creating..." : "Create Note"}
+        </button>
+      </form>
+    </div>
+  </div>
+);
+
 export default function PostPage() {
   const { user, token, loading: authLoading, setUser } = useAuth();
   const [posts, setPosts] = useState([]);
@@ -157,7 +241,7 @@ export default function PostPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 mb-20 relative">
       <div className="flex justify-between items-center mb-8 flex-wrap">
         <h1 className="text-3xl font-bold">
           {user.name.split(" ")[0]}'s Notes
@@ -185,19 +269,19 @@ export default function PostPage() {
       {user && !error && (
         <>
           {posts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {posts.map((post, index) => (
                 <div
                   key={post.id}
-                  className={`p-6 rounded-lg shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
+                  className={`p-6 relative rounded-lg shadow-md cursor-pointer transition-transform transform hover:scale-105 ${
                     index % 2 === 0 ? "bg-indigo-100" : "bg-indigo-100"
                   } ${deletingPostId === post.id ? "fade-out" : ""}`}
                   onClick={() => openModal(post)}
                 >
                   <div className="flex justify-between items-center flex-wrap">
                     <h3 className="text-xl font-bold mb-2">
-                      {post.title.length > 12
-                        ? post.title.slice(0, 12) + "..."
+                      {post.title.length > 19
+                        ? post.title.slice(0, 19) + "..."
                         : post.title}
                     </h3>
                     <FaTrash
@@ -209,12 +293,12 @@ export default function PostPage() {
                     />
                   </div>
 
-                  <p className="text-gray-700 mb-4 overflow-hidden">
-                    {post.content.length > 27
-                      ? post.content.slice(0, 27) + "..."
+                  <p className="text-gray-700 mb-4 overflow-hidden break-all whitespace-normal">
+                    {post.content.length > 120
+                      ? post.content.slice(0, 120) + "..."
                       : post.content}
                   </p>
-                  <small className="text-gray-500">
+                  <small className="text-gray-500 absolute bottom-4">
                     Created at: {new Date(post.created_at).toLocaleString()}
                   </small>
                 </div>
@@ -226,89 +310,26 @@ export default function PostPage() {
         </>
       )}
 
-      {selectedPost && (
-        <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">
-                {selectedPost.title.length > 32
-                  ? selectedPost.title.slice(0, 32) + "..."
-                  : selectedPost.title}
-              </h2>
-              <button
-                className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
-                onClick={closeModal}
-              >
-                <FaTimes size={24} />
-              </button>
-            </div>
-            <div className="overflow-y-auto max-h-[70vh] break-all">
-              <p className="text-gray-700">{selectedPost.content}</p>
-              <small className="text-gray-500">
-                Created at: {new Date(selectedPost.created_at).toLocaleString()}
-              </small>
-            </div>
-          </div>
-        </div>
-      )}
+      {selectedPost && <PostModal post={selectedPost} onClose={closeModal} />}
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full transform transition-transform duration-300 ease-in-out max-h-full overflow-hidden">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Create Note</h2>
-              <button
-                className="text-gray-500 hover:text-gray-700 hover:cursor-pointer"
-                onClick={closeCreateModal}
-              >
-                <FaTimes size={24} />
-              </button>
-            </div>
-            <form onSubmit={createPost} className="flex flex-col w-full">
-              <div className="my-4 flex flex-col">
-                <label className="text-sm text-zinc-600 mb-1" htmlFor="title">
-                  Title
-                </label>
-                <input
-                  id="title"
-                  type="text"
-                  placeholder="Title"
-                  value={newPost.title}
-                  onChange={(e) =>
-                    setNewPost({ ...newPost, title: e.target.value })
-                  }
-                  required
-                  className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300"
-                />
-              </div>
-              <div className="my-4 flex flex-col">
-                <label className="text-sm text-zinc-600 mb-1" htmlFor="content">
-                  Content
-                </label>
-                <textarea
-                  id="content"
-                  placeholder="Content"
-                  value={newPost.content}
-                  onChange={(e) =>
-                    setNewPost({ ...newPost, content: e.target.value })
-                  }
-                  required
-                  className="border border-zinc-300 rounded-md p-3 outline-none transition duration-200 focus:ring focus:ring-zinc-300 h-32"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={createLoading}
-                className={`bg-indigo-600 text-white rounded-md p-2 my-4 cursor-pointer hover:bg-indigo-700 transition duration-200 ${
-                  createLoading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                {createLoading ? "Creating..." : "Create Note"}
-              </button>
-            </form>
-          </div>
-        </div>
+        <CreatePostModal
+          newPost={newPost}
+          setNewPost={setNewPost}
+          onSubmit={createPost}
+          onClose={closeCreateModal}
+          loading={createLoading}
+        />
       )}
+
+      <footer className="mt-8 text-center bottom-0 left-0 bg-white fixed p-4 w-full">
+        <p className="text-zinc-500">
+          Created with ☕ by{" "}
+          <a href="https://github.com/shiwanshudev" className="text-indigo-500">
+            shiwanshudev
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
