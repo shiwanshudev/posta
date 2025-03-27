@@ -18,12 +18,34 @@ export default function Nav() {
         {/* Navigation Links */}
         <div className="flex space-x-6">
           {user ? (
-            <button
-              className="text-white hover:text-zinc-300 transition duration-300"
-              onClick={() => logout()}
-            >
-              Logout
-            </button>
+            <>
+              <NavLink
+                to="/posts"
+                className={({ isActive }) =>
+                  `text-white hover:text-zinc-300 transition duration-300 ${
+                    isActive ? "font-semibold border-b-2 border-white" : ""
+                  }`
+                }
+              >
+                Posts
+              </NavLink>
+              <NavLink
+                to="/user"
+                className={({ isActive }) =>
+                  `text-white hover:text-zinc-300 transition duration-300 ${
+                    isActive ? "font-semibold border-b-2 border-white" : ""
+                  }`
+                }
+              >
+                Profile
+              </NavLink>
+              <button
+                className="text-white hover:text-zinc-300 transition duration-300"
+                onClick={() => logout()}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <NavLink

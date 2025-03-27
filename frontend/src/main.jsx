@@ -8,6 +8,7 @@ import Register from "./components/Register.jsx";
 import Home from "./components/Home.jsx";
 import PostPage from "./pages/PostPage.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
+import UserPage from "./components/UserPage.jsx";
 
 const ProtectedRoute = ({ element, redirectTo }) => {
   const { user } = useAuth();
@@ -41,6 +42,10 @@ createRoot(document.getElementById("root")).render(
             <Route
               path="/posts"
               element={<AuthenticatedRoute element={<PostPage />} />}
+            />
+            <Route
+              path="/user"
+              element={<AuthenticatedRoute element={<UserPage />} />}
             />
           </Route>
         </Routes>
