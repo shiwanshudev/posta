@@ -17,7 +17,9 @@ const PostModal = ({ post, onClose }) => (
         </button>
       </div>
       <div className="overflow-y-auto max-h-[70vh] break-all">
-        <p className="text-gray-700"><ReactMarkdown>{post.content}</ReactMarkdown></p>
+        <div className="text-gray-700">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        </div>
         <small className="text-gray-500">
           Created at: {new Date(post.created_at).toLocaleString()}
         </small>
@@ -294,13 +296,13 @@ export default function PostPage() {
                     />
                   </div>
 
-                  <p className="text-gray-700 mb-4 overflow-hidden break-all whitespace-normal">
-                      <ReactMarkdown>
+                  <div className="text-gray-700 mb-4 overflow-hidden break-all whitespace-normal">
+                    <ReactMarkdown>
                       {post.content.length > 120
-                      ? post.content.slice(0, 120) + "..."
-                      : post.content}
-                      </ReactMarkdown>
-                  </p>
+                        ? post.content.slice(0, 120) + "..."
+                        : post.content}
+                    </ReactMarkdown>
+                  </div>
                   <small className="text-gray-500 absolute bottom-4">
                     Created at: {new Date(post.created_at).toLocaleString()}
                   </small>
