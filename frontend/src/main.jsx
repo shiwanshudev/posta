@@ -9,15 +9,34 @@ import Home from "./components/Home.jsx";
 import PostPage from "./pages/PostPage.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.jsx";
 import UserPage from "./components/UserPage.jsx";
+import { FaSpinner } from "react-icons/fa";
 
-const ProtectedRoute = ({ element, redirectTo }) => {
-  const { user } = useAuth();
-  return user ? <Navigate to={redirectTo} /> : element;
+const ProtectedRoute = ({ children, redirectTo = "/login" }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <FaSpinner className="animate-spin text-4xl text-indigo-500" />
+      </div>
+    );
+  }
+
+  return user ? children : <Navigate to={redirectTo} replace />;
 };
 
-const AuthenticatedRoute = ({ element }) => {
-  const { user } = useAuth();
-  return user ? element : <Navigate to="/login" />;
+const PublicRoute = ({ children, redirectTo = "/posts" }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <FaSpinner className="animate-spin text-4xl text-indigo-500" />
+      </div>
+    );
+  }
+
+  return !user ? children : <Navigate to={redirectTo} replace />;
 };
 
 createRoot(document.getElementById("root")).render(
@@ -27,25 +46,39 @@ createRoot(document.getElementById("root")).render(
         <Routes>
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
+
             <Route
               path="/login"
               element={
-                <ProtectedRoute element={<Login />} redirectTo="/posts" />
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
               }
             />
             <Route
               path="/register"
               element={
-                <ProtectedRoute element={<Register />} redirectTo="/posts" />
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              }
+            />
+
+            <Route
+              path="/posts"
+              element={
+                <ProtectedRoute>
+                  <PostPage />
+                </ProtectedRoute>
               }
             />
             <Route
-              path="/posts"
-              element={<AuthenticatedRoute element={<PostPage />} />}
-            />
-            <Route
               path="/user"
-              element={<AuthenticatedRoute element={<UserPage />} />}
+              element={
+                <ProtectedRoute>
+                  <UserPage />
+                </ProtectedRoute>
+              }
             />
           </Route>
         </Routes>
