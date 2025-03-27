@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { FaTimes, FaSpinner, FaTrash, FaPlus } from "react-icons/fa";
+import ReactMarkdown from "react-markdown";
 
 const PostModal = ({ post, onClose }) => (
   <div className="fixed inset-0 backdrop-brightness-50 flex justify-center items-center z-50">
@@ -16,7 +17,7 @@ const PostModal = ({ post, onClose }) => (
         </button>
       </div>
       <div className="overflow-y-auto max-h-[70vh] break-all">
-        <p className="text-gray-700">{post.content}</p>
+        <p className="text-gray-700"><ReactMarkdown>{post.content}</ReactMarkdown></p>
         <small className="text-gray-500">
           Created at: {new Date(post.created_at).toLocaleString()}
         </small>
@@ -294,9 +295,11 @@ export default function PostPage() {
                   </div>
 
                   <p className="text-gray-700 mb-4 overflow-hidden break-all whitespace-normal">
-                    {post.content.length > 120
+                      <ReactMarkdown>
+                      {post.content.length > 120
                       ? post.content.slice(0, 120) + "..."
                       : post.content}
+                      </ReactMarkdown>
                   </p>
                   <small className="text-gray-500 absolute bottom-4">
                     Created at: {new Date(post.created_at).toLocaleString()}
