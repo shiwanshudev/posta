@@ -5,14 +5,42 @@ import Joi from "joi";
 
 // Validation schemas
 const registerSchema = Joi.object({
-  name: Joi.string().min(3).max(50).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).max(128).required(),
+  name: Joi.string().min(3).max(50).required().messages({
+    "string.base": "Name must be a string.",
+    "string.empty": "Name is required.",
+    "string.min": "Name must be at least 3 characters long.",
+    "string.max": "Name must not exceed 50 characters.",
+    "any.required": "Name is required.",
+  }),
+  email: Joi.string().email().required().messages({
+    "string.base": "Email must be a string.",
+    "string.email": "Email must be a valid email address.",
+    "string.empty": "Email is required.",
+    "any.required": "Email is required.",
+  }),
+  password: Joi.string().min(6).max(128).required().messages({
+    "string.base": "Password must be a string.",
+    "string.empty": "Password is required.",
+    "string.min": "Password must be at least 6 characters long.",
+    "string.max": "Password must not exceed 128 characters.",
+    "any.required": "Password is required.",
+  }),
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).max(128).required(),
+  email: Joi.string().email().required().messages({
+    "string.base": "Email must be a string.",
+    "string.email": "Email must be a valid email address.",
+    "string.empty": "Email is required.",
+    "any.required": "Email is required.",
+  }),
+  password: Joi.string().min(6).max(128).required().messages({
+    "string.base": "Password must be a string.",
+    "string.empty": "Password is required.",
+    "string.min": "Password must be at least 6 characters long.",
+    "string.max": "Password must not exceed 128 characters.",
+    "any.required": "Password is required.",
+  }),
 });
 
 // Register user
@@ -21,9 +49,13 @@ export const registerController = async (req, res) => {
     const { name, email, password } = req.body;
 
     // Validate request body
-    const { error } = registerSchema.validate({ name, email, password });
+    const { error } = registerSchema.validate(
+      { name, email, password },
+      { abortEarly: false }
+    );
     if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+      const validationMessages = error.details.map((detail) => detail.message);
+      return res.status(400).json({ message: validationMessages });
     }
 
     // Check if user already exists
@@ -60,9 +92,13 @@ export const loginController = async (req, res) => {
     const { email, password } = req.body;
 
     // Validate request body
-    const { error } = loginSchema.validate({ email, password });
+    const { error } = loginSchema.validate(
+      { email, password },
+      { abortEarly: false }
+    );
     if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+      const validationMessages = error.details.map((detail) => detail.message);
+      return res.status(400).json({ message: validationMessages });
     }
 
     // Check if user exists
@@ -114,3 +150,4 @@ export const verifyTokenController = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+// Logout user

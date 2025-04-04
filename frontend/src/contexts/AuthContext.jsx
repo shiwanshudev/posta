@@ -57,7 +57,10 @@ const AuthProvider = ({ children }) => {
       );
 
       if (!res.ok) {
-        throw new Error("Login failed. Please check your credentials.");
+        const errorData = await res.json(); // Extract error message from response
+        throw new Error(
+          errorData.message || "Login failed. Please check your credentials."
+        );
       }
 
       const data = await res.json();
@@ -66,7 +69,7 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       navigate("/posts");
     } catch (error) {
-      setError(error);
+      setError(error.message); // Set the error message from the backend
     } finally {
       setLoading(false);
     }
@@ -89,7 +92,10 @@ const AuthProvider = ({ children }) => {
       );
 
       if (!res.ok) {
-        throw new Error("Registration failed. Please check your details.");
+        const errorData = await res.json(); // Extract error message from response
+        throw new Error(
+          errorData.message || "Registration failed. Please check your details."
+        );
       }
 
       const data = await res.json();
@@ -98,13 +104,11 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem("token", data.token);
       navigate("/posts");
     } catch (error) {
-      console.error("Registration error:", error);
-      setError(error);
+      setError(error.message); // Set the error message from the backend
     } finally {
       setLoading(false);
     }
   };
-
   const logout = () => {
     setUser(null);
     setToken(null);
